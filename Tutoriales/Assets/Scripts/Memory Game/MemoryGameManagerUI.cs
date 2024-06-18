@@ -3,18 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class MemoryGameManagerUI : MonoBehaviour
+public class MemoryGameManagerUI : MinigamesBase
 {
     public static MemoryGameManagerUI Instance { get; private set; }
 
     [SerializeField] private CardGroup cardGroup;
     [SerializeField] private List<CardSingleUI> cardSingleUIList = new List<CardSingleUI>();
 
-    [SerializeField] private GameObject gameArea;
-
     private void Awake()
     {
         Instance = this;
+    }
+
+    private void Start()
+    {
+        cardGroup.OnCardMatch += CardGroup_OnCardMatch;
     }
 
     private void OnEnable()
@@ -43,11 +46,6 @@ public class MemoryGameManagerUI : MonoBehaviour
                 DifficultyManager.Instance.Toggle(false);
                 ToggleGameArea(true);
             });
-    }
-
-    private void Start()
-    {
-        cardGroup.OnCardMatch += CardGroup_OnCardMatch;
     }
 
     public void Subscribe(CardSingleUI cardSingleUI)
@@ -81,22 +79,8 @@ public class MemoryGameManagerUI : MonoBehaviour
 
     }
 
-    public DifficultyEnum GetDifficulty()
-    {
-        return DifficultyManager.Instance.GetDifficulty();
-    }
-
     public void Restart()
     {
         cardSingleUIList.Clear();
-    }
-    private void Toggle(bool toggle)
-    {
-        gameObject.SetActive(toggle);
-    }
-
-    private void ToggleGameArea(bool toggle)
-    {
-        gameArea.SetActive(toggle);
     }
 }

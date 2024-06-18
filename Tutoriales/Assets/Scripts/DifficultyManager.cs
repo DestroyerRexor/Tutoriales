@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+[DefaultExecutionOrder(0)]
 public class DifficultyManager : MonoBehaviour
 {
     public static DifficultyManager Instance { get; private set; }
