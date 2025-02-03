@@ -17,21 +17,23 @@ public class CardGridUI : MonoBehaviour
     [SerializeField] private Transform cardContainer;
     [SerializeField] private Transform cardPrefab;
 
+    private MemoryGameManagerUI memoryGameManager;
+
     private void Start()
     {
         cardPrefab.gameObject.SetActive(false);
     }
 
-    private void OnEnable()
+    public void Init(MemoryGameManagerUI memoryGameManager)
     {
-        FillGrid();
+        this.memoryGameManager = memoryGameManager;
     }
 
-    private void FillGrid()
+    public void FillGrid()
     {
         int cardsToShow = 0;
 
-        switch (MemoryGameManagerUI.Instance.GetDifficulty())
+        switch (memoryGameManager.GetDifficulty())
         {
             case DifficultyEnum.Easy:
                 cardsToShow = 6;
@@ -61,7 +63,11 @@ public class CardGridUI : MonoBehaviour
             Transform cardTransform = Instantiate(cardPrefab, cardContainer);
             cardTransform.gameObject.SetActive(true);
             cardTransform.name = card.cardName;
-            cardTransform.GetComponent<CardSingleUI>().SetCardImage(card.cardImage);
+
+            CardSingleUI cardSingleUI = cardTransform.GetComponent<CardSingleUI>();
+            cardSingleUI.SetCardImage(card.cardImage);
+            cardSingleUI.Init(memoryGameManager);
+
         }
     }
 

@@ -31,8 +31,12 @@ public class SimonSaysGroup : MonoBehaviour
     private float secondsToShow = 1f;
     private float secondsToHide = 0.5f;
 
-    private void OnEnable()
+    private SimonSaysManagerUI simonSaysManager;
+
+    public void Init(SimonSaysManagerUI simonSaysManagerUI)
     {
+        simonSaysManager = simonSaysManagerUI;
+
         faceImage.sprite = smileFace;
         GetTimesByDifficulty();
         StartCoroutine(InitSimonSays());
@@ -147,7 +151,7 @@ public class SimonSaysGroup : MonoBehaviour
 
     private int GetTimesByDifficulty()
     {
-        switch (SimonSaysManagerUI.Instance.GetDifficulty())
+        switch (simonSaysManager.GetDifficulty())
         {
             case DifficultyEnum.Easy:
                 timesToWin = 5;

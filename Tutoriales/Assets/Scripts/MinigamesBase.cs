@@ -1,69 +1,69 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public abstract class MinigamesBase : MonoBehaviour
 {
     [Header("Minigame base")]
     [SerializeField] protected GameObject gameArea;
+    protected virtual string minigameName => "";
 
-    [SerializeField] private Button negativeButton;
-    [SerializeField] private Button positiveButton;
+    private GameOverManager gameOverManager;
 
-    protected void Toggle(bool toggle)
+    public void Setup(GameOverManager gameOverManager)
     {
-        gameObject.SetActive(toggle);
+        this.gameOverManager = gameOverManager;
     }
 
-    protected void ToggleGameArea(bool toggle)
+    public virtual void InitializeDifficulty(System.Action onClose = null)
     {
-        gameArea.SetActive(toggle);
+        DifficultyManager.Instance
+            .ResetListeners()
+            .OnCloseButtonClick(() =>
+            {
+                Hide();
+                onClose?.Invoke();
+            })
+            .OnEasyButtonClick(() =>
+            {
+                Show();
+            })
+            .OnNormalButtonClick(() =>
+            {
+                Show();
+            })
+            .OnHardButtonClick(() =>
+            {
+                Show();
+            });
     }
 
     protected virtual void GameWin(int currencyValue, string titleText, string descriptionText, System.Action onNegative = null, System.Action onPositive = null)
     {
-        Debug.Log($"{titleText} {descriptionText} {currencyValue}");
-
-        negativeButton?.onClick.AddListener(() =>
-        {
-            onNegative?.Invoke();
-            Toggle(true);
-            ToggleGameArea(false);
-            DifficultyManager.Instance.Toggle(true);
-        });
-
-        positiveButton?.onClick.AddListener(() =>
-        {
-            onPositive?.Invoke();
-            Toggle(false);
-            ToggleGameArea(false);
-            DifficultyManager.Instance.HideCloseButton();
-        });
+        gameOverManager.Setup(titleText, $"{descriptionText}\n{currencyValue}", Hide).Show();
     }
 
     public virtual void GameLose(string titleText, string descriptionText, System.Action onNegative = null, System.Action onPositive = null)
     {
-        Debug.Log($"{titleText} {descriptionText}");
-
-        negativeButton?.onClick.AddListener(() =>
-        {
-            onNegative?.Invoke();
-            Toggle(true);
-            ToggleGameArea(false);
-            DifficultyManager.Instance.Toggle(true);
-        });
-
-        positiveButton?.onClick.AddListener(() =>
-        {
-            onPositive?.Invoke();
-            Toggle(false);
-            ToggleGameArea(false);
-            DifficultyManager.Instance.HideCloseButton();
-        });
+        gameOverManager.Setup(titleText, descriptionText, Hide).Show();
     }
 
     public DifficultyEnum GetDifficulty()
     {
         return DifficultyManager.Instance.GetDifficulty();
+    }
+
+    public virtual void Show()
+    {
+        gameArea.SetActive(true);
+    }
+
+    public virtual void Hide()
+    {
+        gameArea.SetActive(false);
+    }
+
+    public override string ToString()
+    {
+        return minigameName;
     }
 }

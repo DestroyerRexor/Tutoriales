@@ -25,6 +25,9 @@ public class CardSingleUI : MonoBehaviour
     [SerializeField] private float duration = 0.25f;
     private Tweener[] tweener = new Tweener[3];
 
+
+    private MemoryGameManagerUI memoryGameManager;
+
     private void Awake()
     {
         if (cardGroup == null)
@@ -38,6 +41,11 @@ public class CardSingleUI : MonoBehaviour
         }
     }
 
+    public void Init(MemoryGameManagerUI memoryGameManager)
+    {
+        this.memoryGameManager = memoryGameManager;
+    }
+
     private void Start()
     {
         cardBackButton.onClick.AddListener(OnClick);
@@ -46,7 +54,7 @@ public class CardSingleUI : MonoBehaviour
 
         StartCoroutine(WaitingToHide());
 
-        MemoryGameManagerUI.Instance.Subscribe(this);
+        memoryGameManager.Subscribe(this);
 
     }
 

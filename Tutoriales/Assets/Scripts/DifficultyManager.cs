@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-[DefaultExecutionOrder(0)]
 public class DifficultyManager : MonoBehaviour
 {
     public static DifficultyManager Instance { get; private set; }
@@ -19,8 +18,6 @@ public class DifficultyManager : MonoBehaviour
 
     private DifficultyEnum difficulty;
 
-    private bool isActive;
-
     private void Awake()
     {
         Instance = this;
@@ -28,67 +25,90 @@ public class DifficultyManager : MonoBehaviour
 
     private void Start()
     {
-        
+        Hide();
     }
 
-    public DifficultyManager OnCloseButtonClick(Action onClick)
+    public DifficultyManager OnCloseButtonClick(Action onClick, bool autoHide = true)
     {
         closeMinigameButton.onClick.AddListener(() =>
         {
+            closeMinigameButton.interactable = false;
             closeMinigameButton.GetComponent<TweenerUI>()
             .Show()
             .OnComplete(() =>
             {
-                
+                closeMinigameButton.interactable = true;
+
                 onClick?.Invoke();
+
+                if (autoHide)
+                    Hide();
             });
         });
 
         return this;
     }
 
-    public DifficultyManager OnEasyButtonClick(Action onClick)
+    public DifficultyManager OnEasyButtonClick(Action onClick, bool autoHide = true)
     {
         easyButton.onClick.AddListener(() =>
         {
+            easyButton.interactable = false;
             easyButton.GetComponent<TweenerUI>()
             .Show()
             .OnComplete(() =>
             {
+                easyButton.interactable = true;
+
                 difficulty = DifficultyEnum.Easy;
                 onClick?.Invoke();
+
+                if (autoHide) 
+                    Hide();
             });
         });
 
         return this;
     }
 
-    public DifficultyManager OnNormalButtonClick(Action onClick)
+    public DifficultyManager OnNormalButtonClick(Action onClick, bool autoHide = true)
     {
         normalButton.onClick.AddListener(() =>
         {
+            normalButton.interactable = false;
             normalButton.GetComponent<TweenerUI>()
             .Show()
             .OnComplete(() =>
             {
+                normalButton.interactable = true;
+
                 difficulty = DifficultyEnum.Normal;
                 onClick?.Invoke();
+
+                if (autoHide)
+                    Hide();
             });
         });
 
         return this;
     }
 
-    public DifficultyManager OnHardButtonClick(Action onClick)
+    public DifficultyManager OnHardButtonClick(Action onClick, bool autoHide = true)
     {
         hardButton.onClick.AddListener(() =>
         {
+            hardButton.interactable = false;
             hardButton.GetComponent<TweenerUI>()
             .Show()
             .OnComplete(() =>
             {
+                hardButton.interactable = true;
+
                 difficulty = DifficultyEnum.Hard;
                 onClick?.Invoke();
+
+                if (autoHide)
+                    Hide();
             });
         });
 
@@ -105,28 +125,15 @@ public class DifficultyManager : MonoBehaviour
         return this;
     }
 
-    public void HideCloseButton()
-    {
-        closeMinigameButton.gameObject.SetActive(false);
-    }
-
-    public void ShowCloseButton()
-    {
-        closeMinigameButton.gameObject.SetActive(true);
-    }
-
-    public void InteractableCloseButton(bool interactable)
-    {
-        closeMinigameButton.interactable = interactable;
-    }
-
     public DifficultyEnum GetDifficulty() => difficulty;
 
-    public void Toggle(bool toggle)
+    public void Show()
     {
-        isActive = toggle;
+        difficultySelector.SetActive(true);
+    }
 
-        difficultySelector.SetActive(isActive);
-
+    public void Hide()
+    {
+        difficultySelector.SetActive(false);
     }
 }

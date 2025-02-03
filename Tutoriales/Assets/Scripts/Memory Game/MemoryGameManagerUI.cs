@@ -5,48 +5,12 @@ using UnityEngine;
 
 public class MemoryGameManagerUI : MinigamesBase
 {
-    public static MemoryGameManagerUI Instance { get; private set; }
+    protected override string minigameName => "Memory Game";
 
+    [Space]
     [SerializeField] private CardGroup cardGroup;
+    [SerializeField] private CardGridUI cardGridUI;
     [SerializeField] private List<CardSingleUI> cardSingleUIList = new List<CardSingleUI>();
-
-    private void Awake()
-    {
-        Instance = this;
-    }
-
-    private void Start()
-    {
-        cardGroup.OnCardMatch += CardGroup_OnCardMatch;
-    }
-
-    private void OnEnable()
-    {
-        StartCoroutine(Initialize());
-    }
-
-    private IEnumerator Initialize()
-    {
-        yield return new WaitForSeconds(0.1f);
-
-        DifficultyManager.Instance
-            .ResetListeners()
-            .OnEasyButtonClick(() =>
-            {
-                DifficultyManager.Instance.Toggle(false);
-                ToggleGameArea(true);
-            })
-            .OnNormalButtonClick(() =>
-            {
-                DifficultyManager.Instance.Toggle(false);
-                ToggleGameArea(true);
-            })
-            .OnHardButtonClick(() =>
-            {
-                DifficultyManager.Instance.Toggle(false);
-                ToggleGameArea(true);
-            });
-    }
 
     public void Subscribe(CardSingleUI cardSingleUI)
     {
@@ -73,14 +37,26 @@ public class MemoryGameManagerUI : MinigamesBase
     {
         yield return new WaitForSeconds(0.75f);
 
-        //Hacer cualquier cosa cuando ganes
-
-        Debug.Log("Has ganado");
-
+        GameWin(10, "Felicidades", "Ganaste");
     }
 
     public void Restart()
     {
         cardSingleUIList.Clear();
+    }
+
+    public override void Show()
+    {
+        base.Show();
+        cardGridUI.Init(this);
+        cardGridUI.FillGrid();
+        cardGroup.OnCardMatch += CardGroup_OnCardMatch;
+    }
+
+    public override void Hide()
+    {
+        base.Hide();
+
+        cardGroup.OnCardMatch -= CardGroup_OnCardMatch;
     }
 }
