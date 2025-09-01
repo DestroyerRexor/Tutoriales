@@ -39,11 +39,15 @@ public abstract class MinigamesBase : MonoBehaviour
 
     protected virtual void GameWin(int currencyValue, string titleText, string descriptionText, System.Action onNegative = null, System.Action onPositive = null)
     {
+        TimerUI.Instance.SetTimeOver();
+
         gameOverManager.Setup(titleText, $"{descriptionText}\n{currencyValue}", Hide).Show();
     }
 
     public virtual void GameLose(string titleText, string descriptionText, System.Action onNegative = null, System.Action onPositive = null)
     {
+        TimerUI.Instance.SetTimeOver();
+
         gameOverManager.Setup(titleText, descriptionText, Hide).Show();
     }
 
