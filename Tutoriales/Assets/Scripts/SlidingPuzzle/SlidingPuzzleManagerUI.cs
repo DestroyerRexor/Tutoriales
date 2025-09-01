@@ -34,6 +34,7 @@ public class SlidingPuzzleManagerUI : MinigamesBase
         base.Hide();
 
         slidingPuzzleGroup.OnCompleteGame -= OnCompleteGame;
+        TimerUI.Instance.OnTimeOver += OnLoseGame;
     }
 
     private void OnCompleteGame()
