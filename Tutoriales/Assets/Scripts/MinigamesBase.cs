@@ -7,7 +7,9 @@ public abstract class MinigamesBase : MonoBehaviour
     [SerializeField] protected GameObject gameArea;
     protected virtual string minigameName => "";
 
-    private GameOverManager gameOverManager;
+    protected GameOverManager gameOverManager;
+
+    public GameOverManager GameOverManager => gameOverManager;
 
     public void Setup(GameOverManager gameOverManager)
     {

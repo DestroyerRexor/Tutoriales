@@ -33,30 +33,28 @@ public class SimonSaysSingleUI : MonoBehaviour
 
     private void OnEnable()
     {
-        simonSayButton.onClick.AddListener(() =>
-        {
-            if (!simonSaysGroup.GetWaitingForInput()) return;
-
-            SelectColor();
-
-            DisableButton();
-
-            tweenerUI.Show().OnComplete(() =>
-            {
-                EnableButton();
-            });
-
-        });
+        simonSayButton.onClick.AddListener(OnButtonClicked);
     }
 
     private void OnDisable()
     {
-        RemoveListener();
-
+        simonSayButton.onClick.RemoveListener(OnButtonClicked);
         HideColor();
     }
 
+    private void OnButtonClicked()
+    {
+        simonSaysGroup.OnColorButtonPressed(simonSaysColor);
+
+        PlayVisualFeedback();
+    }
+
     public void Select()
+    {
+        PlayVisualFeedback();
+    }
+
+    private void PlayVisualFeedback()
     {
         ShowColor();
 
@@ -66,16 +64,11 @@ public class SimonSaysSingleUI : MonoBehaviour
         });
     }
 
-    public void RemoveListener() => simonSayButton.onClick.RemoveAllListeners();
-    private void SelectColor() => simonSaysGroup.OnColorSelected(this);
     public void ShowColor() => simonSayImage.sprite = enableSprite;
     public void HideColor() => simonSayImage.sprite = disableSprite;
+
     public void DisableButton() => simonSayButton.interactable = false;
     public void EnableButton() => simonSayButton.interactable = true;
 
-    public SimonSaysColor GetSimonSaysColor()
-    {
-        return simonSaysColor;
-    }
-
+    public SimonSaysColor GetSimonSaysColor() => simonSaysColor;
 }

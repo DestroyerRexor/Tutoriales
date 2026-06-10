@@ -12,6 +12,21 @@ public class MemoryGameManagerUI : MinigamesBase
     [SerializeField] private CardGridUI cardGridUI;
     [SerializeField] private List<CardSingleUI> cardSingleUIList = new List<CardSingleUI>();
 
+    private void Start()
+    {
+        gameOverManager.OnRestart += OnClose;
+    }
+
+    private void OnDestroy()
+    {
+        gameOverManager.OnRestart -= OnClose;
+    }
+
+    private void OnClose()
+    {
+        Restart();
+    }
+
     public void Subscribe(CardSingleUI cardSingleUI)
     {
         if (cardSingleUIList == null)
@@ -38,6 +53,7 @@ public class MemoryGameManagerUI : MinigamesBase
         yield return new WaitForSeconds(0.75f);
 
         GameWin(10, "Felicidades", "Ganaste");
+        Restart();
     }
 
     public void Restart()

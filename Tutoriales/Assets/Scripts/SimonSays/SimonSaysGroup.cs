@@ -26,20 +26,32 @@ public class SimonSaysGroup : MonoBehaviour
 
     [SerializeField] private List<SimonSaysSingleUI> simonSaysSingleList = new List<SimonSaysSingleUI>();
 
-    private bool waitingForInput = false;
     private int timesToWin = 5;
     private float secondsToShow = 1f;
     private float secondsToHide = 0.5f;
 
     private SimonSaysManagerUI simonSaysManager;
 
+    private Dictionary<SimonSaysColor, SimonSaysSingleUI> _colorToUI = new Dictionary<SimonSaysColor, SimonSaysSingleUI>();
+
+    private Coroutine _sequenceCoroutine;
+    private int _currentPlayerStep = 0;
+
     public void Init(SimonSaysManagerUI simonSaysManagerUI)
     {
         simonSaysManager = simonSaysManagerUI;
-
         faceImage.sprite = smileFace;
+
+        _colorToUI.Clear();
+
+        foreach (SimonSaysSingleUI singleUI in simonSaysSingleList)
+        {
+            _colorToUI.Add(singleUI.GetSimonSaysColor(), singleUI);
+        }
+
         GetTimesByDifficulty();
-        StartCoroutine(InitSimonSays());
+
+        _sequenceCoroutine = StartCoroutine(PlaySequence());
     }
 
     private void OnDisable()
@@ -47,90 +59,65 @@ public class SimonSaysGroup : MonoBehaviour
         simonSaysOrder.Clear();
         simonSaysPlayerOrder.Clear();
 
-        foreach (SimonSaysSingleUI simonSaysSingleUI in simonSaysSingleList)
-        {
-            simonSaysSingleUI.RemoveListener();
-        }
-
-        StopCoroutine(InitSimonSays());
+        if (_sequenceCoroutine != null) StopCoroutine(_sequenceCoroutine);
     }
 
-    private IEnumerator InitSimonSays()
+    private IEnumerator PlaySequence()
     {
-        #region PREPARANDO SIMON DICE
-        foreach (SimonSaysSingleUI simonSaysSingleUI in simonSaysSingleList)
+        foreach (SimonSaysSingleUI singleUI in simonSaysSingleList)
         {
-            simonSaysSingleUI.DisableButton();
+            singleUI.DisableButton();
         }
 
         yield return new WaitForSeconds(1.5f);
 
-        #endregion
+        simonSaysOrder.Add(GenerateRandomColor());
 
-        #region GENERAR UN COLOR ALEATORIO Y AÑADIRLO A LISTA
-        SimonSaysColor simonSays = GenerateRandomColor();
-        simonSaysOrder.Add(simonSays);
-        #endregion
-
-        #region RECORRER LISTA DE COLORES PASADOS, SI ENCUENTRA ILUMINARLO Y ACTIVAR CARITA
         for (int i = 0; i < simonSaysOrder.Count; i++)
         {
-            SimonSaysSingleUI simonSaysSingle = simonSaysSingleList.Find(x => x.GetSimonSaysColor() == simonSaysOrder[i]);
+            SimonSaysColor colorToPlay = simonSaysOrder[i];
 
-            if (simonSaysSingle == null) continue;
-
-            faceImage.sprite = singFace;
-            simonSaysSingle.ShowColor();
-            yield return new WaitForSeconds(secondsToShow);
-            faceImage.sprite = smileFace;
-            simonSaysSingle.HideColor();
-            yield return new WaitForSeconds(secondsToHide);
-
-        }
-        #endregion
-
-        #region ACTIVAR INTERACCION CON BOTONES
-        foreach (SimonSaysSingleUI simonSaysSingleUI in simonSaysSingleList)
-        {
-            simonSaysSingleUI.EnableButton();
-        }
-        #endregion
-
-        #region ESPERAR A QUE EL JUGADOR PULSE UN BOTÓN
-        for (int i = 0; i < simonSaysOrder.Count; i++)
-        {
-            waitingForInput = true;
-            while (waitingForInput)
+            if (_colorToUI.TryGetValue(colorToPlay, out SimonSaysSingleUI simonSaysSingle))
             {
-                yield return null;
+                faceImage.sprite = singFace;
+                simonSaysSingle.Select();
+
+                yield return new WaitForSeconds(secondsToShow);
+
+                faceImage.sprite = smileFace;
+                yield return new WaitForSeconds(secondsToHide);
             }
         }
-        #endregion
 
-        #region DESACTIVAR INTERACCION CON BOTONES
-        foreach (SimonSaysSingleUI simonSaysSingleUI in simonSaysSingleList)
+        _currentPlayerStep = 0;
+        simonSaysPlayerOrder.Clear();
+
+        foreach (SimonSaysSingleUI singleUI in simonSaysSingleList)
         {
-            simonSaysSingleUI.DisableButton();
+            singleUI.EnableButton();
         }
-        #endregion
+    }
 
-        #region VERIFICAR SI EL ORDEN ES CORRECTO
-        bool success = true;
-        for (int i = 0; i < simonSaysOrder.Count; i++)
+    public void OnColorButtonPressed(SimonSaysColor pressedColor)
+    {
+        simonSaysPlayerOrder.Add(pressedColor);
+
+        if (pressedColor != simonSaysOrder[_currentPlayerStep])
         {
-            if (simonSaysOrder[i] != simonSaysPlayerOrder[i])
-            {
-                success = false;
-                break;
-            }
+            OnLoseGame?.Invoke(this, System.EventArgs.Empty);
+            return;
         }
-        #endregion
 
-        #region SI EL ORDEN ES CORRECTO PASAMOS A LA SIGUIENTE RONDA Y LIMPIAMOS LA LISTA DEL JUGADOR Y VOLVEMOS A INICIAR EL JUEGO, CASO CONTRARIO MARCAR COMO PERDIDO
-        if (success)
+        _currentPlayerStep++;
+
+        if (_currentPlayerStep >= simonSaysOrder.Count)
         {
             timesToWin--;
-            simonSaysPlayerOrder.Clear();
+
+            foreach (SimonSaysSingleUI singleUI in simonSaysSingleList)
+            {
+                singleUI.DisableButton();
+            }
 
             if (IsGameOver())
             {
@@ -138,15 +125,9 @@ public class SimonSaysGroup : MonoBehaviour
             }
             else
             {
-                StartCoroutine(InitSimonSays());
+                _sequenceCoroutine = StartCoroutine(PlaySequence());
             }
         }
-        else
-        {
-            OnLoseGame?.Invoke(this, System.EventArgs.Empty);
-        }
-        #endregion
-
     }
 
     private int GetTimesByDifficulty()
@@ -174,16 +155,7 @@ public class SimonSaysGroup : MonoBehaviour
 
         return timesToWin;
     }
-    public void OnColorSelected(SimonSaysSingleUI simonSaysSingleUI)
-    {
-        simonSaysSingleUI.Select();
 
-        simonSaysPlayerOrder.Add(simonSaysSingleUI.GetSimonSaysColor());
-
-        waitingForInput = false;
-
-    }
-    public bool GetWaitingForInput() => waitingForInput;
     private SimonSaysColor GenerateRandomColor() => (SimonSaysColor)Random.Range(0, 4);
     private bool IsGameOver() => timesToWin <= 0;
 

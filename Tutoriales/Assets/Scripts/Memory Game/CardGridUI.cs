@@ -29,8 +29,21 @@ public class CardGridUI : MonoBehaviour
         this.memoryGameManager = memoryGameManager;
     }
 
+    private void CleanGrid()
+    {
+        for (int i = transform.childCount - 1; i >= 0; i--)
+        {
+            GameObject child = transform.GetChild(i).gameObject;
+            Destroy(child);
+        }
+
+        cardListToSort.Clear();
+    }
+
     public void FillGrid()
     {
+        CleanGrid();
+
         int cardsToShow = 0;
 
         switch (memoryGameManager.GetDifficulty())

@@ -7,11 +7,36 @@ public class CardGroup : MonoBehaviour
 {
     [SerializeField] private List<CardSingleUI> cardSingleUIList = new List<CardSingleUI>();
     [SerializeField] private List<CardSingleUI> selectedCardList = new List<CardSingleUI>();
+    [SerializeField] private MemoryGameManagerUI _memoryGameManager;
 
     [SerializeField] private Sprite cardIdle;
     [SerializeField] private Sprite cardActive;
 
     public event EventHandler OnCardMatch;
+
+    private void Awake()
+    {
+        if(_memoryGameManager == null)
+        {
+            _memoryGameManager = FindObjectOfType<MemoryGameManagerUI>();
+        }
+    }
+
+    private void Start()
+    {
+        _memoryGameManager.GameOverManager.OnRestart += OnClose;
+    }
+
+    private void OnDestroy()
+    {
+        _memoryGameManager.GameOverManager.OnRestart -= OnClose;
+    }
+
+    private void OnClose()
+    {
+        cardSingleUIList.Clear();
+        selectedCardList.Clear();
+    }
 
     public void Subscribe(CardSingleUI cardSingleUI)
     {

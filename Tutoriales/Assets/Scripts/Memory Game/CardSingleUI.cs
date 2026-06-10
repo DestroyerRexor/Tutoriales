@@ -23,8 +23,6 @@ public class CardSingleUI : MonoBehaviour
     [SerializeField] private Vector3 selectRotation = new Vector3();
     [SerializeField] private Vector3 deselectRotation = new Vector3();
     [SerializeField] private float duration = 0.25f;
-    private Tweener[] tweener = new Tweener[3];
-
 
     private MemoryGameManagerUI memoryGameManager;
 
@@ -65,65 +63,32 @@ public class CardSingleUI : MonoBehaviour
 
     public void Select()
     {
-        tweener[0] = transform.DORotate(selectRotation, duration)
-            .SetEase(Ease.InOutElastic)
-            .OnUpdate(CheckSelectHalfDuration);
+        FlipAnimation(selectRotation, true);
     }
 
     public void Deselect()
     {
-        tweener[1] = transform.DORotate(deselectRotation, duration)
-            .SetEase(Ease.InOutElastic)
-            .OnUpdate(CheckDeselectHalfDuration);
+        FlipAnimation(deselectRotation, false);
     }
 
     private IEnumerator WaitingToHide()
     {
         yield return new WaitForSeconds(3f);
 
-        tweener[2] = transform.DORotate(deselectRotation, duration)
-            .SetEase(Ease.InOutElastic)
-            .OnUpdate(CheckWaitingToHide);
-
+        FlipAnimation(deselectRotation, false);
     }
 
-    private void CheckWaitingToHide()
+    private void FlipAnimation(Vector3 targetRotation, bool showFront)
     {
-        float elapsed = tweener[2].Elapsed();
+        Sequence flipSeq = DOTween.Sequence();
 
-        float halfDuration = tweener[2].Duration() / 2f;
+        flipSeq.Append(transform.DORotate(targetRotation, duration).SetEase(Ease.InOutElastic));
 
-        if (elapsed >= halfDuration)
+        flipSeq.InsertCallback(duration / 2f, () =>
         {
-            cardFront.SetActive(false);
-            cardBack.SetActive(true);
-        }
-    }
-
-    private void CheckSelectHalfDuration()
-    {
-        float elapsed = tweener[0].Elapsed();
-
-        float halfDuration = tweener[0].Duration() / 2f;
-
-        if (elapsed >= halfDuration)
-        {
-            cardBack.SetActive(false);
-            cardFront.SetActive(true);
-        }
-    }
-
-    private void CheckDeselectHalfDuration()
-    {
-        float elapsed = tweener[0].Elapsed();
-
-        float halfDuration = tweener[0].Duration() / 2f;
-
-        if (elapsed >= halfDuration)
-        {
-            cardFront.SetActive(false);
-            cardBack.SetActive(true);
-        }
+            cardFront.SetActive(showFront);
+            cardBack.SetActive(!showFront);
+        });
     }
 
     public Image GetCardBackBackground() => cardBackBackground;

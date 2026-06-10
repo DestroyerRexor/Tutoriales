@@ -13,7 +13,8 @@ public class GameOverManager : MonoBehaviour
     [SerializeField] private TMPro.TMP_Text descriptionText;
     //[SerializeField] private Button restartButton;
 
-    private event System.Action OnClose;
+    public event System.Action OnClose;
+    public event System.Action OnRestart;
 
     private void Start()
     {
@@ -32,6 +33,7 @@ public class GameOverManager : MonoBehaviour
         minigamesHandler.Show();
         Hide();
         OnClose?.Invoke();
+        OnRestart?.Invoke();
     }
 
     public GameOverManager Setup(string title, string description, System.Action onCloseCallback = null)

@@ -37,7 +37,7 @@ public class TimerUI : MonoBehaviour
         timerCounting = 0;
         timeOver = false;
 
-        if(timerText != null)
+        if (timerText != null)
         {
             if (timerCoroutine != null) StopCoroutine(timerCoroutine);
             timerCoroutine = StartCoroutine(StartTimer());
@@ -52,12 +52,26 @@ public class TimerUI : MonoBehaviour
     public TimerUI SetMaxTimer(float timerMax)
     {
         timerCountMax = timerMax;
+        timerCount = timerCountMax;
         return this;
     }
 
     public TimerUI SetTimerText(TMP_Text timerText)
     {
         this.timerText = timerText;
+        return this;
+    }
+
+    public TimerUI Play()
+    {
+        if (timerText == null) return this;
+
+        timeOver = false;
+        timerCounting = 0;
+
+        if (timerCoroutine != null) StopCoroutine(timerCoroutine);
+        timerCoroutine = StartCoroutine(StartTimer());
+
         return this;
     }
 
@@ -87,9 +101,9 @@ public class TimerUI : MonoBehaviour
         timerCoroutine = null;
     }
 
-    public void SetTimeOver()
+    public void SetTimeOver(bool isTimeOver = true)
     {
-        timeOver = true;
+        timeOver = isTimeOver;
     }
 
     public void Hide()

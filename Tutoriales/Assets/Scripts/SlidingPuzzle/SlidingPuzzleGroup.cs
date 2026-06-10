@@ -142,7 +142,7 @@ public class SlidingPuzzleGroup : MonoBehaviour
                 break;
         }
 
-        TimerUI.Instance.SetMaxTimer(timer);
+        TimerUI.Instance.SetMaxTimer(timer).Play();
     }
 
     private int FindIndexByPiece(SlidingPuzzleSingleUI slidingPuzzleSingleUI)
